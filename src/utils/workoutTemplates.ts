@@ -717,10 +717,10 @@ export const workoutTemplates: WorkoutTemplate[] = [
   {
     id: "5x5-strength",
     name: "5×5 Strength Program",
-    description: "Effective strength program focusing on compound movements and progressive overload for consistent strength gains.",
-    difficulty: "beginner",
-    equipment: ["Barbell", "Squat Rack", "Bench"],
-    duration: 45,
+    description: "A science-backed strength training method focused on compound movements with 5 sets of 5 reps for maximum strength development. This program emphasizes progressive overload for reliable strength gains.",
+    difficulty: "intermediate",
+    equipment: ["Barbell", "Bench", "Squat Rack"],
+    duration: 60,
     frequency: 3,
     goal: "Strength",
     planDuration: {
@@ -738,7 +738,7 @@ export const workoutTemplates: WorkoutTemplate[] = [
             restTime: 180 
           },
           { 
-            exerciseId: "bb2", // Bench Press
+            exerciseId: "bb2", // Barbell Bench Press
             sets: 5, 
             reps: "5", 
             restTime: 180 
@@ -778,11 +778,11 @@ export const workoutTemplates: WorkoutTemplate[] = [
   },
   {
     id: "push-pull-legs",
-    name: "Push-Pull-Legs (PPL) Split",
-    description: "6-day split routine for maximizing muscle growth by targeting specific movement patterns while allowing adequate recovery.",
+    name: "Push-Pull-Legs Split",
+    description: "An evidence-based training split that organizes workouts by movement patterns. Push days work chest, shoulders, and triceps. Pull days target back and biceps. Leg days focus on the lower body. This research-supported approach optimizes recovery between muscle groups.",
     difficulty: "intermediate",
-    equipment: ["Dumbbells", "Barbell", "Cable Machine", "Bench"],
-    duration: 60,
+    equipment: ["Barbell", "Dumbbell", "Cable Machine", "Bench"],
+    duration: 75,
     frequency: 6,
     goal: "Muscle Gain",
     planDuration: {
@@ -794,33 +794,33 @@ export const workoutTemplates: WorkoutTemplate[] = [
         name: "Push Day (Chest, Shoulders, Triceps)",
         exercises: [
           { 
-            exerciseId: "bb2", // Bench Press
+            exerciseId: "bb2", // Barbell Bench Press
             sets: 4, 
             reps: "8-10", 
             restTime: 120 
           },
           { 
-            exerciseId: "db5", // Overhead Press
+            exerciseId: "db5", // Dumbbell Shoulder Press
             sets: 3, 
-            reps: "8-12", 
+            reps: "10-12", 
             restTime: 90 
           },
           { 
-            exerciseId: "db12", // Lateral Raises
+            exerciseId: "db9", // Dumbbell Incline Press
+            sets: 3, 
+            reps: "10-12", 
+            restTime: 90 
+          },
+          { 
+            exerciseId: "cb1", // Tricep Pushdown
             sets: 3, 
             reps: "12-15", 
             restTime: 60 
           },
           { 
-            exerciseId: "cb1", // Tricep Pushdowns
+            exerciseId: "db12", // Lateral Raises
             sets: 3, 
-            reps: "10-12", 
-            restTime: 60 
-          },
-          { 
-            exerciseId: "cb2", // Overhead Tricep Extension
-            sets: 3, 
-            reps: "10-12", 
+            reps: "12-15", 
             restTime: 60 
           }
         ]

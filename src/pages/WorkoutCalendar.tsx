@@ -958,34 +958,50 @@ const WorkoutCalendar: React.FC = () => {
             
             <div className="flex flex-col space-y-3 justify-end">
               <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center"
                 onClick={() => handleConflictResolution('replace')}
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
                 Replace This Day Only
+                <span className="ml-auto text-xs opacity-75">(Removes existing workouts for this day)</span>
               </button>
               
               {/* Only show the replace plan option if there is a template event with a templateId */}
               {conflictData.existingEvents.some(e => e.templateId) && (
                 <button
-                  className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+                  className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center"
                   onClick={() => handleConflictResolution('replace-plan')}
                 >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
                   Replace Entire Plan
+                  <span className="ml-auto text-xs opacity-75">(Removes all related template workouts)</span>
                 </button>
               )}
               
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
                 onClick={() => handleConflictResolution('keep')}
               >
-                Keep Both
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Keep Both Workouts
+                <span className="ml-auto text-xs opacity-75">(Adds this workout alongside existing ones)</span>
               </button>
               
               <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors flex items-center"
                 onClick={() => handleConflictResolution('cancel')}
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
                 Cancel
+                <span className="ml-auto text-xs opacity-75">(Don't add this workout)</span>
               </button>
             </div>
           </div>
@@ -1121,29 +1137,47 @@ const WorkoutCalendar: React.FC = () => {
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
             <h3 className="text-xl font-bold mb-4">Workout Plan Conflict</h3>
             
-            <p className="mb-4 text-gray-700">
+            <p className="mb-6 text-gray-700">
               You already have a workout plan on your calendar.
               What would you like to do with the new workout plan 
-              (<span className="font-semibold">{newTemplateEvents.length > 0 ? newTemplateEvents[0].title : 'New Plan'}</span>)?
+              (<span className="font-semibold">{newTemplateEvents.length > 0 ? newTemplateEvents[0].title.split(' - ')[0] : 'New Plan'}</span>)?
             </p>
             
-            <div className="flex flex-col space-y-3">
+            <div className="space-y-4">
+              <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                <h4 className="font-medium text-purple-800">Plan Details:</h4>
+                <p className="text-sm text-purple-700 mt-1">
+                  This plan includes <span className="font-semibold">{newTemplateEvents.length}</span> workouts 
+                  over <span className="font-semibold">{Math.ceil(newTemplateEvents.length / (newTemplateEvents.length > 0 ? conflictingPlanId ? newTemplateEvents.filter(e => e.date === newTemplateEvents[0].date).length : 1 : 1))}</span> weeks
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col space-y-3 mt-6">
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-4 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
                 onClick={() => handlePlanConflictResolution(true)}
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
                 Keep Both Plans
+                <span className="ml-auto text-xs opacity-75">(May create scheduling conflicts)</span>
               </button>
               
               <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                className="px-4 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center"
                 onClick={() => handlePlanConflictResolution(false)}
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
                 Replace Old Plan with New Plan
+                <span className="ml-auto text-xs opacity-75">(Removes existing plan workouts)</span>
               </button>
               
               <button
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                className="px-4 py-3 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors flex items-center"
                 onClick={() => {
                   setShowPlanConflictModal(false);
                   setNewTemplateEvents([]);
@@ -1152,7 +1186,11 @@ const WorkoutCalendar: React.FC = () => {
                   sessionStorage.removeItem('pendingEvents');
                 }}
               >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
                 Cancel
+                <span className="ml-auto text-xs opacity-75">(Don't add the new plan)</span>
               </button>
             </div>
           </div>

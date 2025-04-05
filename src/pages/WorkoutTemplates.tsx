@@ -445,12 +445,13 @@ const WorkoutTemplates: React.FC = () => {
                           </svg>
                         </div>
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                          <p className="font-semibold mb-1">Recommended Program Durations:</p>
+                          <p className="font-semibold mb-1">Scientific Recommendation:</p>
                           <ul className="list-disc list-inside space-y-1">
-                            <li>Beginners typically see strength gains in 6-8 weeks</li>
-                            <li>Weight loss programs work best with 12+ weeks of consistency</li>
-                            <li>Muscle building programs show results after 8-12 weeks</li>
-                            <li>Initial fitness adaptations often occur in 4-6 weeks</li>
+                            <li>Beginners typically see significant strength gains in 6-8 weeks of consistent training (Abe et al., 2000)</li>
+                            <li>Weight loss programs are most effective with 12+ weeks of sustained adherence (Donnelly et al., 2009)</li>
+                            <li>Muscle hypertrophy programs show optimal results after 8-12 weeks (Schoenfeld et al., 2017)</li>
+                            <li>Initial fitness adaptations occur in 4-6 weeks, but sustainable results require 12+ weeks (ACSM, 2009)</li>
+                            <li>For elite athletes, periodized training blocks of 4-8 weeks optimize performance (Bompa & Haff, 2009)</li>
                           </ul>
                           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-gray-800"></div>
                         </div>

@@ -44,11 +44,15 @@ export interface BasePlan {
   id: string;
   name: string;
   description?: string;
-  duration: number;
-  difficulty: string;
+  duration: number; // Duration of each session in minutes
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   equipment: string[];
   frequency?: number;
   goal?: string;
+  planDuration?: {
+    value: number;
+    unit: 'weeks' | 'months';
+  };
 }
 
 // Workout template plan
@@ -75,18 +79,22 @@ export function isWorkoutDay(day: PlanDay): day is WorkoutDay {
   return 'day' in day;
 }
 
-export function isTemplateExercise(exercise: any): exercise is TemplateExercise {
-  return 'exerciseId' in exercise;
+export function isTemplateExercise(exercise: object | null): exercise is TemplateExercise {
+  return !!exercise && 'exerciseId' in exercise;
 }
 
-export function isWorkoutExercise(exercise: any): exercise is WorkoutExercise {
-  return 'exercise' in exercise;
+export function isWorkoutExercise(exercise: object | null): exercise is WorkoutExercise {
+  return !!exercise && 'exercise' in exercise;
 }
+
+// Use specific literal types
+export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
+export type WorkoutEnvironment = 'home' | 'gym' | 'outdoors';
 
 export interface UserPreferences {
-  fitnessLevel: string;
+  fitnessLevel: FitnessLevel;
   goals: string[];
-  workoutEnvironment: string;
+  workoutEnvironment: WorkoutEnvironment;
   availableEquipment: string[];
   timePerSession: number;
   workoutDays: string[];
@@ -94,4 +102,29 @@ export interface UserPreferences {
     value: number;
     unit: 'weeks' | 'months';
   };
+}
+
+// Type for a single exercise within a user-created custom workout
+export type CustomExercise = {
+  exercise: Exercise; // Reference to the base Exercise details
+  sets: number;
+  reps: string; // Reps can be a range like '8-12' or a specific number
+  restTime: number; // Rest time in seconds
+};
+
+// Type for a user-created custom workout routine
+export type CustomWorkout = {
+  id: string; // Unique identifier (UUID)
+  name: string;
+  description: string;
+  exercises: CustomExercise[]; // Array of exercises in the workout
+  createdAt: string; // ISO date string of creation time
+};
+
+export interface WorkoutCalendarEvent {
+  id: string;
+  date: string;
+  title: string;
+  type: 'scheduled' | 'template';
+  templateId?: string;
 } 

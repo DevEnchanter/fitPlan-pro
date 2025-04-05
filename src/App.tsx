@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import WorkoutForm from './components/workout/WorkoutForm';
 import WorkoutPlan from './components/workout/WorkoutPlan';
@@ -30,7 +31,6 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 
 // Main app header with navigation
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   return (
@@ -45,6 +45,7 @@ const Header = () => {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-4">
+          <Link to="/" className="text-white hover:text-purple-200 transition">Home</Link>
           <Link to="/templates" className="text-white hover:text-purple-200 transition">Templates</Link>
           <Link to="/exercises" className="text-white hover:text-purple-200 transition">Exercises</Link>
           <Link to="/builder" className="text-white hover:text-purple-200 transition">Builder</Link>
@@ -177,6 +178,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-100 flex flex-col">
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <Header />
         
         <div className="flex-grow">

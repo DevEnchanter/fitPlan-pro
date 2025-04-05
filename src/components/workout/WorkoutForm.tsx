@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserPreferences } from '../../types';
+import { exerciseDatabase } from '../../utils/exerciseDatabase';
 
 interface WorkoutFormProps {
   onCreateWorkout: (preferences: UserPreferences) => void;
@@ -16,12 +17,21 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ onCreateWorkout }) => {
   const [activeSection, setActiveSection] = useState(1);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
 
-  const allGoals = ['Strength', 'Muscle Gain', 'Weight Loss', 'Endurance', 'Flexibility'];
-  const allEquipment = {
-    'home': ['None', 'Dumbbells', 'Resistance Bands', 'Pull-up Bar', 'Kettlebells', 'Yoga Mat'],
-    'gym': ['Dumbbells', 'Barbells', 'Resistance Machines', 'Cable Machine', 'Treadmill', 'Rowing Machine', 'Stair Climber', 'Bench'],
-    'outdoors': ['None', 'Resistance Bands', 'Bodyweight', 'Park Bench', 'Pull-up Bar']
+  const allGoals = ['Strength', 'Muscle Gain', 'Weight Loss', 'Endurance', 'Flexibility', 'General Fitness'];
+  
+  // Define equipment available per environment
+  const equipmentByEnvironment = {
+    'home': ['None', 'Dumbbells', 'Resistance Bands', 'Pull-up Bar', 'Kettlebells', 'Yoga Mat', 'Jump Rope', 'Ab Wheel', 'Medicine Ball'],
+    'gym': [
+      'Dumbbells', 'Barbells', 'Resistance Bands', 'Pull-up Bar', 'Kettlebells', 'Yoga Mat', 'Jump Rope',
+      'Bench', 'Cable Machine', 'Treadmill', 'Rowing Machine', 'Stair Climber', 'Elliptical Machine',
+      'Leg Press Machine', 'Leg Curl Machine', 'Leg Extension Machine', 'Chest Fly Machine', 
+      'Smith Machine', 'Hack Squat Machine', 'Preacher Curl Bench', 'Ab Wheel', 'Medicine Ball', 'Battle Ropes', 
+      'Parallel Bars'
+    ],
+    'outdoors': ['None', 'Resistance Bands', 'Bodyweight', 'Park Bench', 'Pull-up Bar', 'Jump Rope']
   };
+  
   const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   const handleGoalChange = (goal: string) => {
@@ -290,8 +300,8 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ onCreateWorkout }) => {
             <label className="block text-gray-700 font-medium mb-3">
               What equipment do you have access to? (Select all that apply)
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {allEquipment[workoutEnvironment].map((equipment) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {equipmentByEnvironment[workoutEnvironment].map((equipment) => (
                 <div 
                   key={equipment}
                   onClick={() => handleEquipmentChange(equipment)}
@@ -439,22 +449,6 @@ const WorkoutForm: React.FC<WorkoutFormProps> = ({ onCreateWorkout }) => {
                   <option value="weeks">Weeks</option>
                   <option value="months">Months</option>
                 </select>
-              </div>
-            </div>
-            
-            <div>
-              <label className="block font-medium mb-2">How much time can you spend per workout?</label>
-              <div className="flex items-center">
-                <input
-                  type="range"
-                  min="15"
-                  max="120"
-                  step="5"
-                  value={timePerSession}
-                  onChange={(e) => setTimePerSession(parseInt(e.target.value))}
-                  className="w-full"
-                />
-                <span className="ml-3 w-20 text-center">{timePerSession} min</span>
               </div>
             </div>
           </div>

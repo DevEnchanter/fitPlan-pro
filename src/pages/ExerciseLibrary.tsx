@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Exercise } from '../types';
-import { exerciseDatabase } from '../utils/exerciseDatabase';
+import useExerciseFilter from '../hooks/useExerciseFilter';
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -60,65 +60,30 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
 };
 
 const ExerciseLibrary: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedEquipment, setSelectedEquipment] = useState<string>('All');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
-  const [filteredExercises, setFilteredExercises] = useState<Exercise[]>(exerciseDatabase);
+  const {
+    searchTerm,
+    setSearchTerm,
+    category,
+    setCategory,
+    equipment,
+    setEquipment,
+    filteredExercises,
+    categories,
+    equipmentOptions
+  } = useExerciseFilter();
 
-  // Get unique categories for filter
-  const categories = ['All', ...Array.from(new Set(exerciseDatabase.map(exercise => exercise.category)))];
-  
-  // Get unique equipment options for filter
-  const equipmentOptions = ['All', ...Array.from(new Set(exerciseDatabase.flatMap(exercise => exercise.equipment)))];
-  
-  // Difficulty levels
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
+
   const difficultyLevels = ['All', 'beginner', 'intermediate', 'advanced'];
 
-  useEffect(() => {
-    let result = [];
-    
-    try {
-      // Start with full database
-      result = [...exerciseDatabase];
-      
-      // Apply search filter
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        result = result.filter(
-          exercise => 
-            exercise.name.toLowerCase().includes(term) || 
-            exercise.description.toLowerCase().includes(term)
-        );
-      }
-      
-      // Apply category filter
-      if (selectedCategory !== 'All') {
-        result = result.filter(exercise => exercise.category === selectedCategory);
-      }
-      
-      // Apply equipment filter
-      if (selectedEquipment !== 'All') {
-        result = result.filter(exercise => exercise.equipment.includes(selectedEquipment));
-      }
-      
-      // Apply difficulty filter
-      if (selectedDifficulty !== 'All') {
-        result = result.filter(exercise => exercise.difficulty === selectedDifficulty);
-      }
-    } catch (error) {
-      console.error('Error filtering exercises:', error);
-      result = exerciseDatabase; // Fallback to full database if there's an error
-    }
-    
-    setFilteredExercises(result);
-  }, [searchTerm, selectedCategory, selectedEquipment, selectedDifficulty]);
+  const exercisesToDisplay = filteredExercises.filter(exercise => 
+    selectedDifficulty === 'All' || exercise.difficulty === selectedDifficulty
+  );
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Exercise Library</h1>
       
-      {/* Search and Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-grow">
@@ -138,8 +103,8 @@ const ExerciseLibrary: React.FC = () => {
             <select
               id="category"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
             >
               {categories.map((category) => (
                 <option key={category} value={category}>{category}</option>
@@ -152,8 +117,8 @@ const ExerciseLibrary: React.FC = () => {
             <select
               id="equipment"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={selectedEquipment}
-              onChange={(e) => setSelectedEquipment(e.target.value)}
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
             >
               {equipmentOptions.map((equipment) => (
                 <option key={equipment} value={equipment}>{equipment}</option>
@@ -177,10 +142,9 @@ const ExerciseLibrary: React.FC = () => {
         </div>
       </div>
       
-      {/* Exercise List */}
-      {filteredExercises.length > 0 ? (
+      {exercisesToDisplay.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredExercises.map((exercise) => (
+          {exercisesToDisplay.map((exercise) => (
             <ExerciseCard key={exercise.id} exercise={exercise} />
           ))}
         </div>

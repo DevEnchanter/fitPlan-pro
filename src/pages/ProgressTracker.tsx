@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
+import { v4 as uuidv4 } from 'uuid';
 
 type TrackingMetric = {
   id: string;
@@ -10,6 +11,12 @@ type TrackingMetric = {
   notes: string;
 };
 
+// Define a simple type for calendar events read from localStorage
+interface CalendarEvent {
+  date: string;
+  // Add other properties if needed, but date is minimum requirement here
+}
+
 const ProgressTracker: React.FC = () => {
   const [trackingData, setTrackingData] = useLocalStorage<TrackingMetric[]>('workout-tracking-data', []);
   const [weight, setWeight] = useState<string>('');
@@ -18,11 +25,17 @@ const ProgressTracker: React.FC = () => {
   const [workoutsCompleted, setWorkoutsCompleted] = useState<number>(0);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [chartMetric, setChartMetric] = useState<'weight' | 'bodyFat' | 'workouts'>('weight');
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   
-  // Get workouts completed this week
+  // Get calendar events from localStorage using the hook
+  const [calendarEvents] = useLocalStorage<CalendarEvent[]>('workout-calendar-events', []);
+  
+  // Update workoutsCompleted when calendarEvents change or form is shown
   useEffect(() => {
-    // Get calendar events from localStorage
-    const calendarEvents = JSON.parse(localStorage.getItem('workout-calendar-events') || '[]');
+    // Only recalculate if the form is visible to avoid unnecessary computation
+    if (!showForm) return;
+    
+    let events: CalendarEvent[] = calendarEvents; // Use events from hook
     
     // Count completed workouts this week
     const today = new Date();
@@ -32,35 +45,77 @@ const ProgressTracker: React.FC = () => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(endOfWeek.getDate() + 7);
     
-    const completedWorkouts = calendarEvents.filter((event: any) => {
-      const eventDate = new Date(event.date);
-      return eventDate >= startOfWeek && eventDate < endOfWeek;
+    const completedWorkouts = events.filter((event: CalendarEvent) => { // Use CalendarEvent type
+      try {
+        // Add error handling for invalid dates
+        const eventDate = new Date(event.date);
+        if (isNaN(eventDate.getTime())) return false; // Skip invalid dates
+        return eventDate >= startOfWeek && eventDate < endOfWeek;
+      } catch (e) {
+        // Catch potential errors from Date constructor
+        return false;
+      }
     });
     
     setWorkoutsCompleted(completedWorkouts.length);
-  }, []);
+  // Add dependencies: calendarEvents and showForm
+  }, [calendarEvents, showForm]);
   
-  const handleAddEntry = () => {
-    const newEntry: TrackingMetric = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      weight: weight ? parseFloat(weight) : undefined,
-      bodyFat: bodyFat ? parseFloat(bodyFat) : undefined,
-      workoutsCompleted,
-      notes
-    };
+  const handleAddOrUpdateEntry = () => {
+    const weightValue = weight ? parseFloat(weight) : undefined;
+    const bodyFatValue = bodyFat ? parseFloat(bodyFat) : undefined;
+
+    if (editingEntryId) {
+      // Update existing entry
+      setTrackingData(trackingData.map(entry => 
+        entry.id === editingEntryId 
+          ? { ...entry, weight: weightValue, bodyFat: bodyFatValue, notes, workoutsCompleted } 
+          : entry
+      ));
+      alert('Progress entry updated.');
+    } else {
+      // Add new entry
+      const newEntry: TrackingMetric = {
+        id: uuidv4(), // Use UUID
+        date: new Date().toISOString().split('T')[0],
+        weight: weightValue,
+        bodyFat: bodyFatValue,
+        workoutsCompleted,
+        notes
+      };
+      setTrackingData([...trackingData, newEntry]);
+      alert('Progress entry added.');
+    }
     
-    setTrackingData([...trackingData, newEntry]);
-    
-    // Reset form
+    resetForm();
+  };
+
+  const handleEditEntry = (entry: TrackingMetric) => {
+    setEditingEntryId(entry.id);
+    setWeight(entry.weight?.toString() ?? '');
+    setBodyFat(entry.bodyFat?.toString() ?? '');
+    setNotes(entry.notes ?? '');
+    setWorkoutsCompleted(entry.workoutsCompleted ?? 0);
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setEditingEntryId(null);
     setWeight('');
     setBodyFat('');
     setNotes('');
+    // Don't reset workoutsCompleted automatically, let useEffect handle it
+    // setWorkoutsCompleted(0);
     setShowForm(false);
   };
   
   const handleDeleteEntry = (id: string) => {
-    setTrackingData(trackingData.filter(entry => entry.id !== id));
+    if (window.confirm('Are you sure you want to delete this progress entry?')) {
+       setTrackingData(trackingData.filter(entry => entry.id !== id));
+       if (editingEntryId === id) {
+         resetForm(); // Reset form if deleting the entry being edited
+       }
+    }
   };
   
   const formatDate = (dateString: string) => {
@@ -151,14 +206,16 @@ const ProgressTracker: React.FC = () => {
             className="mt-3 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             onClick={() => setShowForm(true)}
           >
-            Add New Entry
+            {editingEntryId ? 'Edit Entry' : 'Add New Entry'}
           </button>
         </div>
         
         {/* Entry Form */}
         {showForm && (
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-medium mb-3">New Progress Entry</h3>
+            <h3 className="text-lg font-medium mb-3">
+              {editingEntryId ? 'Update Progress Entry' : 'New Progress Entry'}
+            </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -221,15 +278,15 @@ const ProgressTracker: React.FC = () => {
             <div className="flex justify-end space-x-2">
               <button
                 className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
-                onClick={() => setShowForm(false)}
+                onClick={resetForm}
               >
                 Cancel
               </button>
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={handleAddEntry}
+                onClick={handleAddOrUpdateEntry}
               >
-                Save Entry
+                {editingEntryId ? 'Update Entry' : 'Save Entry'}
               </button>
             </div>
           </div>
@@ -307,10 +364,16 @@ const ProgressTracker: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {entry.workoutsCompleted}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title={entry.notes}>
                         {entry.notes || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                         <button
+                           onClick={() => handleEditEntry(entry)}
+                           className="text-indigo-600 hover:text-indigo-900"
+                         >
+                           Edit
+                         </button>
                         <button
                           onClick={() => handleDeleteEntry(entry.id)}
                           className="text-red-600 hover:text-red-900"

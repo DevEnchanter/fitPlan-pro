@@ -7,7 +7,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw1',
     name: 'Push-ups',
     description: 'Classic bodyweight exercise for chest, shoulders, and triceps',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['None'],
     difficulty: 'beginner',
     instructions: ['Start in plank position with hands shoulder-width apart', 'Lower chest to ground while keeping elbows close to body', 'Push back up to starting position', 'For easier version, do from knees instead of toes']
@@ -16,7 +16,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw2',
     name: 'Squats',
     description: 'Lower body exercise targeting quads, hamstrings and glutes',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['None'],
     difficulty: 'beginner',
     instructions: ['Stand with feet shoulder-width apart', 'Lower hips down and back as if sitting in a chair', 'Keep chest up and back straight', 'Return to standing position']
@@ -25,7 +25,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw3',
     name: 'Lunges',
     description: 'Unilateral lower body exercise for balance and strength',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['None'],
     difficulty: 'beginner',
     instructions: ['Step forward with one leg', 'Lower body until both knees form 90-degree angles', 'Push back to standing', 'Repeat with other leg']
@@ -52,7 +52,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw6',
     name: 'Burpees',
     description: 'Full-body exercise for strength and cardio',
-    category: 'Cardio',
+    category: 'Full Body',
     equipment: ['None'],
     difficulty: 'intermediate',
     instructions: ['Start standing, then squat down and place hands on floor', 'Jump feet back into plank position', 'Do a push-up (optional)', 'Jump feet forward to hands', 'Jump up with arms overhead', 'Repeat in a fluid motion']
@@ -61,7 +61,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw7',
     name: 'Pull-ups',
     description: 'Upper body pulling exercise for back and biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Pull-up Bar'],
     difficulty: 'advanced',
     instructions: ['Hang from bar with hands shoulder-width apart', 'Pull body up until chin is over the bar', 'Lower body back to starting position with control', 'For easier version, use resistance band for assistance']
@@ -70,8 +70,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw8',
     name: 'Dips',
     description: 'Upper body exercise for chest, shoulders, and triceps',
-    category: 'Strength',
-    equipment: ['None', 'Bench'],
+    category: 'Upper Body Push',
+    equipment: ['None', 'Bench', 'Parallel Bars'],
     difficulty: 'intermediate',
     instructions: ['Support body on parallel bars or bench with arms extended', 'Lower body by bending elbows until upper arms are parallel to ground', 'Push back up to starting position']
   },
@@ -79,7 +79,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw9',
     name: 'Glute Bridges',
     description: 'Lower body exercise targeting glutes and hamstrings',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['None'],
     difficulty: 'beginner',
     instructions: ['Lie on back with knees bent and feet flat on floor', 'Push hips up toward ceiling while squeezing glutes', 'Lower hips back to starting position']
@@ -97,7 +97,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw11',
     name: 'Jump Squats',
     description: 'Explosive lower body exercise for power and cardio',
-    category: 'Cardio',
+    category: 'Lower Body',
     equipment: ['None'],
     difficulty: 'intermediate',
     instructions: ['Stand with feet shoulder-width apart', 'Perform a squat, then explode upward into a jump', 'Land softly and immediately lower into next squat']
@@ -106,7 +106,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw12',
     name: 'Pike Push-ups',
     description: 'Advanced push-up variation targeting shoulders',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['None'],
     difficulty: 'advanced',
     instructions: ['Start in a downward dog position with hips high', 'Bend elbows to lower head toward floor', 'Push back up to starting position']
@@ -124,7 +124,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'bw14',
     name: 'Pistol Squats',
     description: 'Single-leg squat requiring strength and balance',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['None'],
     difficulty: 'advanced',
     instructions: ['Stand on one leg with other leg extended in front', 'Lower into squat on standing leg', 'Return to standing position without putting other foot down']
@@ -144,7 +144,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db1',
     name: 'Dumbbell Rows',
     description: 'Upper body pulling exercise for back and biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Hinge at hips with dumbbell in hand', 'Keep back flat and core engaged', 'Pull dumbbell to hip', 'Lower and repeat']
@@ -153,7 +153,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db2',
     name: 'Dumbbell Bench Press',
     description: 'Upper body pushing exercise for chest, shoulders, and triceps',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Dumbbells', 'Bench'],
     difficulty: 'intermediate',
     instructions: ['Lie on bench with dumbbells at chest level', 'Press dumbbells upward until arms are extended', 'Lower dumbbells back to chest']
@@ -162,7 +162,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db3',
     name: 'Goblet Squats',
     description: 'Weighted squat variation that targets quads and core',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Dumbbells', 'Kettlebells'],
     difficulty: 'intermediate',
     instructions: ['Hold dumbbell or kettlebell close to chest with both hands', 'Perform squat while keeping weight close to body', 'Push through heels to return to standing']
@@ -171,7 +171,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db4',
     name: 'Dumbbell Lunges',
     description: 'Lower body exercise with added resistance',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Hold dumbbells at sides', 'Step forward with one leg and lower until both knees are at 90 degrees', 'Push back to standing and repeat with other leg']
@@ -180,7 +180,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db5',
     name: 'Dumbbell Shoulder Press',
     description: 'Upper body exercise targeting shoulders and triceps',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Sit or stand with dumbbells at shoulder height', 'Press dumbbells overhead until arms are extended', 'Lower dumbbells back to shoulders']
@@ -189,7 +189,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db6',
     name: 'Dumbbell Bicep Curls',
     description: 'Isolation exercise for biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Dumbbells'],
     difficulty: 'beginner',
     instructions: ['Stand with dumbbells at sides', 'Curl dumbbells toward shoulders while keeping elbows close to body', 'Lower dumbbells back to sides']
@@ -198,7 +198,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db7',
     name: 'Dumbbell Deadlifts',
     description: 'Full-body exercise focusing on posterior chain',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Stand with dumbbells in front of thighs', 'Hinge at hips and lower dumbbells while keeping back straight', 'Push through heels to return to standing']
@@ -216,7 +216,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db9',
     name: 'Dumbbell Flyes',
     description: 'Chest isolation exercise',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Dumbbells', 'Bench'],
     difficulty: 'intermediate',
     instructions: ['Lie on bench with dumbbells extended above chest', 'Lower dumbbells outward in arc motion', 'Return to starting position by bringing dumbbells back together']
@@ -225,7 +225,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db10',
     name: 'Dumbbell Romanian Deadlift',
     description: 'Hamstring and lower back exercise',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Stand with dumbbells in front of thighs', 'Hinge at hips while keeping legs mostly straight', 'Lower dumbbells toward ground', 'Return to starting position']
@@ -234,7 +234,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db11',
     name: 'Dumbbell Shrugs',
     description: 'Upper trap isolation exercise',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Dumbbells'],
     difficulty: 'beginner',
     instructions: ['Stand holding dumbbells at sides', 'Elevate shoulders toward ears', 'Hold briefly at top', 'Lower shoulders back down']
@@ -243,7 +243,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db12',
     name: 'Dumbbell Lateral Raises',
     description: 'Shoulder exercise targeting medial deltoid',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Stand with dumbbells at sides', 'Raise dumbbells out to sides until arms are parallel to floor', 'Lower back to starting position with control']
@@ -252,7 +252,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db13',
     name: 'Dumbbell Step-ups',
     description: 'Lower body exercise for legs and glutes',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Dumbbells', 'Bench'],
     difficulty: 'intermediate',
     instructions: ['Hold dumbbells at sides', 'Step up onto bench with one foot', 'Bring other foot up onto bench', 'Step back down and repeat']
@@ -261,7 +261,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db14',
     name: 'Dumbbell Pullovers',
     description: 'Exercise for lats, chest, and serratus',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Dumbbells', 'Bench'],
     difficulty: 'intermediate',
     instructions: ['Lie on bench with single dumbbell held over chest', 'Lower dumbbell behind head in arc motion', 'Return to starting position']
@@ -270,7 +270,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'db15',
     name: 'Dumbbell Walking Lunges',
     description: 'Dynamic lower body exercise',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Hold dumbbells at sides', 'Step forward into lunge position', 'Push off front foot to bring back foot forward into next lunge', 'Continue moving forward']
@@ -281,7 +281,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb1',
     name: 'Band Pull-Aparts',
     description: 'Upper back and shoulder exercise for posture',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Hold band with both hands at chest level', 'Pull band apart until arms are extended to sides', 'Control the return to starting position']
@@ -290,7 +290,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb2',
     name: 'Banded Squats',
     description: 'Resistance squat for glute and leg activation',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Place band just above knees', 'Perform squat while pushing knees outward against band', 'Return to standing while maintaining tension']
@@ -299,7 +299,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb3',
     name: 'Banded Rows',
     description: 'Back exercise using resistance bands',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Secure band around sturdy object at chest height', 'Step back to create tension in band', 'Pull band toward chest while squeezing shoulder blades together', 'Return to starting position with control']
@@ -308,7 +308,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb4',
     name: 'Banded Chest Press',
     description: 'Chest and triceps exercise with bands',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Secure band around back and hold ends in hands', 'Press hands forward until arms are extended', 'Return to starting position with control']
@@ -317,7 +317,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb5',
     name: 'Banded Glute Bridges',
     description: 'Glute exercise with added resistance',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Place band just above knees', 'Lie on back with knees bent and feet flat on floor', 'Push hips up while keeping knees pushed outward', 'Lower hips with control']
@@ -326,7 +326,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb6',
     name: 'Banded Lateral Walks',
     description: 'Hip abductor exercise for glute medius',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Place band just above ankles', 'Bend knees slightly and maintain tension in band', 'Step sideways while keeping tension in band', 'Continue stepping in one direction, then reverse']
@@ -335,7 +335,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb7',
     name: 'Banded Face Pulls',
     description: 'Rear deltoid and upper back exercise',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Resistance Bands'],
     difficulty: 'intermediate',
     instructions: ['Secure band at head height', 'Grasp band with both hands and step back to create tension', 'Pull band toward face with elbows high', 'Return to starting position with control']
@@ -344,7 +344,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb8',
     name: 'Banded Tricep Pushdowns',
     description: 'Isolation exercise for triceps',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Secure band overhead', 'Hold band with hands at chest level', 'Push band downward by extending elbows', 'Return to starting position with control']
@@ -353,7 +353,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb9',
     name: 'Banded Bicep Curls',
     description: 'Isolation exercise for biceps using bands',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Resistance Bands'],
     difficulty: 'beginner',
     instructions: ['Stand on band with feet shoulder-width apart', 'Grasp ends of band with palms facing forward', 'Curl hands toward shoulders', 'Lower with control']
@@ -362,7 +362,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'rb10',
     name: 'Banded Shoulder Press',
     description: 'Shoulder exercise with resistance bands',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Resistance Bands'],
     difficulty: 'intermediate',
     instructions: ['Stand on band with feet shoulder-width apart', 'Start with band at shoulder height', 'Press hands overhead', 'Return to shoulder level with control']
@@ -373,7 +373,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym1',
     name: 'Barbell Squat',
     description: 'Fundamental compound exercise for lower body strength',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Barbell'],
     difficulty: 'advanced',
     instructions: ['Position barbell on upper back', 'Squat down with weight on heels', 'Drive through heels to return to standing']
@@ -382,7 +382,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym2',
     name: 'Lat Pulldown',
     description: 'Machine exercise targeting back and biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Cable Machine'],
     difficulty: 'intermediate',
     instructions: ['Sit at machine and grip bar wider than shoulder width', 'Pull bar down to chest while keeping torso upright', 'Slowly return bar to starting position']
@@ -391,7 +391,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym3',
     name: 'Leg Press',
     description: 'Machine-based lower body exercise',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Leg Press Machine'],
     difficulty: 'intermediate',
     instructions: ['Sit in machine with feet shoulder-width on platform', 'Lower weight by bending knees', 'Push through heels to straighten legs']
@@ -400,7 +400,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym4',
     name: 'Bench Press',
     description: 'Classic chest, shoulder and tricep exercise',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Barbell', 'Bench'],
     difficulty: 'advanced',
     instructions: ['Lie on bench with feet flat on floor', 'Grip barbell slightly wider than shoulder width', 'Lower bar to mid-chest', 'Press bar back up to starting position']
@@ -409,7 +409,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym5',
     name: 'Deadlift',
     description: 'Compound exercise for total body strength',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Barbell'],
     difficulty: 'advanced',
     instructions: ['Stand with feet hip-width apart and barbell over mid-foot', 'Bend at hips and knees to grip bar', 'Lift bar by driving hips forward', 'Return bar to floor with controlled movement']
@@ -418,7 +418,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym6',
     name: 'Seated Row',
     description: 'Machine exercise for back and biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Cable Machine'],
     difficulty: 'intermediate',
     instructions: ['Sit at machine with feet on platform and knees slightly bent', 'Grab handles and pull toward torso', 'Slowly return to starting position']
@@ -427,8 +427,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym7',
     name: 'Leg Curl',
     description: 'Isolation exercise for hamstrings',
-    category: 'Strength',
-    equipment: ['Resistance Machines'],
+    category: 'Lower Body',
+    equipment: ['Leg Curl Machine'],
     difficulty: 'beginner',
     instructions: ['Lie face down on machine with pad against back of ankles', 'Curl legs toward buttocks', 'Return to starting position with control']
   },
@@ -436,8 +436,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym8',
     name: 'Chest Fly Machine',
     description: 'Isolation exercise for chest',
-    category: 'Strength',
-    equipment: ['Resistance Machines'],
+    category: 'Upper Body Push',
+    equipment: ['Chest Fly Machine'],
     difficulty: 'beginner',
     instructions: ['Sit on machine with back against pad', 'Push handles together in front of chest', 'Return to starting position with control']
   },
@@ -445,7 +445,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym9',
     name: 'Barbell Row',
     description: 'Compound exercise for back and biceps',
-    category: 'Strength',
+    category: 'Upper Body Pull',
     equipment: ['Barbell'],
     difficulty: 'advanced',
     instructions: ['Hinge at hips with slight knee bend', 'Grasp barbell with hands wider than shoulder width', 'Pull barbell to lower ribs', 'Lower bar with control']
@@ -454,8 +454,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym10',
     name: 'Leg Extension',
     description: 'Isolation exercise for quadriceps',
-    category: 'Strength',
-    equipment: ['Resistance Machines'],
+    category: 'Lower Body',
+    equipment: ['Leg Extension Machine'],
     difficulty: 'beginner',
     instructions: ['Sit on machine with pads on front of ankles', 'Extend legs until straight', 'Return to starting position with control']
   },
@@ -463,7 +463,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym11',
     name: 'Tricep Pushdown',
     description: 'Cable exercise for triceps',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Cable Machine'],
     difficulty: 'beginner',
     instructions: ['Stand facing cable machine with rope attachment at head height', 'Grasp rope with both hands', 'Push rope down by extending elbows', 'Return to starting position with control']
@@ -472,8 +472,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym12',
     name: 'Preacher Curl',
     description: 'Bicep isolation exercise with support',
-    category: 'Strength',
-    equipment: ['Resistance Machines', 'Barbell'],
+    category: 'Upper Body Pull',
+    equipment: ['Preacher Curl Bench', 'Barbell', 'Dumbbells'],
     difficulty: 'intermediate',
     instructions: ['Sit at preacher bench with arms extended over pad', 'Curl weight toward shoulders', 'Lower with control back to starting position']
   },
@@ -481,7 +481,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym13',
     name: 'Smith Machine Squat',
     description: 'Guided barbell squat variation',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Smith Machine'],
     difficulty: 'intermediate',
     instructions: ['Position bar on upper back', 'Unrack weight and squat down', 'Push through heels to return to standing', 'Rack weight at end of set']
@@ -490,7 +490,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym14',
     name: 'Cable Crossover',
     description: 'Cable exercise for chest',
-    category: 'Strength',
+    category: 'Upper Body Push',
     equipment: ['Cable Machine'],
     difficulty: 'intermediate',
     instructions: ['Stand between cable stations with pulleys set high', 'Grasp handles and step forward', 'Pull handles together in front of body', 'Return to starting position with control']
@@ -499,8 +499,8 @@ export const exerciseDatabase: Exercise[] = [
     id: 'gym15',
     name: 'Hack Squat',
     description: 'Machine squat variation targeting quads',
-    category: 'Strength',
-    equipment: ['Resistance Machines'],
+    category: 'Lower Body',
+    equipment: ['Hack Squat Machine'],
     difficulty: 'intermediate',
     instructions: ['Position shoulders under pads and feet on platform', 'Unrack weight and lower body by bending knees', 'Push through heels to return to starting position']
   },
@@ -529,7 +529,7 @@ export const exerciseDatabase: Exercise[] = [
     name: 'Jump Rope',
     description: 'High-intensity cardio for coordination and endurance',
     category: 'Cardio',
-    equipment: ['None'],
+    equipment: ['Jump Rope'],
     difficulty: 'intermediate',
     instructions: ['Hold rope handles with rope behind you', 'Swing rope overhead and jump over it as it passes under feet', 'Maintain a steady rhythm for 1-3 minutes']
   },
@@ -577,15 +577,6 @@ export const exerciseDatabase: Exercise[] = [
     equipment: ['Stair Climber'],
     difficulty: 'intermediate',
     instructions: ['Step onto machine and grasp handrails lightly', 'Begin stepping at comfortable pace', 'Maintain upright posture', 'Continue for 10-20 minutes']
-  },
-  {
-    id: 'cardio9',
-    name: 'Kettlebell Swings',
-    description: 'Dynamic exercise for cardio and posterior chain',
-    category: 'Cardio',
-    equipment: ['Kettlebells'],
-    difficulty: 'intermediate',
-    instructions: ['Stand with feet wider than shoulder-width', 'Hold kettlebell with both hands', 'Hinge at hips and swing kettlebell between legs', 'Thrust hips forward to swing kettlebell to chest height']
   },
   {
     id: 'cardio10',
@@ -689,12 +680,12 @@ export const exerciseDatabase: Exercise[] = [
     instructions: ['Lie on back with legs extended straight up', 'Lower legs to one side while keeping shoulders on ground', 'Return to center and lower to opposite side']
   },
 
-  // Add kettlebell exercises
+  // Kettlebell exercises
   {
     id: 'kb1',
     name: 'Kettlebell Swings',
     description: 'Dynamic exercise for posterior chain and cardio',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Stand with feet wider than shoulder-width', 'Hold kettlebell with both hands', 'Hinge at hips and swing kettlebell between legs', 'Thrust hips forward to swing kettlebell to chest height']
@@ -703,7 +694,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb2',
     name: 'Kettlebell Goblet Squats',
     description: 'Lower body exercise with kettlebell',
-    category: 'Strength',
+    category: 'Lower Body',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Hold kettlebell close to chest with both hands', 'Perform squat while keeping weight close to body', 'Push through heels to return to standing']
@@ -712,7 +703,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb3',
     name: 'Kettlebell Clean and Press',
     description: 'Compound exercise for full body strength',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Kettlebells'],
     difficulty: 'intermediate',
     instructions: ['Start with kettlebell on ground between feet', 'Pull kettlebell up with one arm in fluid motion to shoulder', 'Press kettlebell overhead', 'Lower back to shoulder then to ground']
@@ -730,7 +721,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb5',
     name: 'Kettlebell Turkish Get-Up',
     description: 'Complex full-body exercise for stability and mobility',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Kettlebells'],
     difficulty: 'advanced',
     instructions: ['Lie on back with kettlebell held in one hand above chest', 'Rise to standing position while keeping kettlebell overhead', 'Reverse movement to return to starting position', 'Repeat on other side']
@@ -739,7 +730,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb6',
     name: 'Kettlebell Rows',
     description: 'Back exercise using kettlebell',
-    category: 'Pull',
+    category: 'Upper Body Pull',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Hinge at hips with kettlebell in one hand', 'Keep back flat and core engaged', 'Pull kettlebell to hip', 'Lower and repeat']
@@ -748,7 +739,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb7',
     name: 'Kettlebell Lunges',
     description: 'Lower body exercise with kettlebell',
-    category: 'Legs',
+    category: 'Lower Body',
     equipment: ['Kettlebells'],
     difficulty: 'intermediate',
     instructions: ['Hold kettlebell in one or both hands', 'Step forward with one leg and lower until both knees are at 90 degrees', 'Push back to standing and repeat with other leg']
@@ -757,7 +748,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb8',
     name: 'Kettlebell Halos',
     description: 'Shoulder mobility exercise with kettlebell',
-    category: 'Push',
+    category: 'Upper Body Push',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Hold kettlebell by the horns (sides of handle) at chest level', 'Rotate kettlebell around head in circular motion', 'Keep core tight and shoulders down', 'Complete circles in both directions']
@@ -766,7 +757,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb9',
     name: 'Kettlebell Deadlifts',
     description: 'Lower body and back exercise with kettlebell',
-    category: 'Pull',
+    category: 'Full Body',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Stand with kettlebell between feet', 'Hinge at hips and grab kettlebell with both hands', 'Drive through heels and extend hips to stand', 'Lower kettlebell back to ground with control']
@@ -775,7 +766,7 @@ export const exerciseDatabase: Exercise[] = [
     id: 'kb10',
     name: 'Kettlebell Farmers Carry',
     description: 'Functional exercise for grip and core strength',
-    category: 'Strength',
+    category: 'Full Body',
     equipment: ['Kettlebells'],
     difficulty: 'beginner',
     instructions: ['Hold kettlebells at sides', 'Walk forward with shoulders back and core engaged', 'Focus on keeping torso upright', 'Continue for specified distance or time']

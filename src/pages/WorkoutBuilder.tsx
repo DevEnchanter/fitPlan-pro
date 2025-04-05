@@ -1,22 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Exercise } from '../types';
-import { exerciseDatabase } from '../utils/exerciseDatabase';
+import { Exercise, CustomExercise, CustomWorkout } from '../types';
 import useLocalStorage from '../hooks/useLocalStorage';
-
-type CustomExercise = {
-  exercise: Exercise;
-  sets: number;
-  reps: string;
-  restTime: number;
-};
-
-type CustomWorkout = {
-  id: string;
-  name: string;
-  description: string;
-  exercises: CustomExercise[];
-  createdAt: string;
-};
+import { v4 as uuidv4 } from 'uuid';
+import useExerciseFilter from '../hooks/useExerciseFilter';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const WorkoutBuilder: React.FC = () => {
   // State for the workout being built
@@ -24,40 +12,30 @@ const WorkoutBuilder: React.FC = () => {
   const [workoutDescription, setWorkoutDescription] = useState('');
   const [selectedExercises, setSelectedExercises] = useState<CustomExercise[]>([]);
   
-  // State for exercise selection
-  const [categoryFilter, setCategoryFilter] = useState<string>('All');
-  const [equipmentFilter, setEquipmentFilter] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredExercises, setFilteredExercises] = useState<Exercise[]>(exerciseDatabase);
+  // Use hook for exercise selection filtering
+  const {
+    searchTerm: searchQuery,
+    setSearchTerm: setSearchQuery,
+    category: categoryFilter,
+    setCategory: setCategoryFilter,
+    equipment: equipmentFilter,
+    setEquipment: setEquipmentFilter,
+    filteredExercises,
+    categories,
+    equipmentOptions
+  } = useExerciseFilter();
+  
+  // State for editing
+  const [editingWorkoutId, setEditingWorkoutId] = useState<string | null>(null);
   
   // Saved workouts
   const [savedWorkouts, setSavedWorkouts] = useLocalStorage<CustomWorkout[]>('custom-workouts', []);
   
-  // Get unique categories and equipment for filters
-  const categories = ['All', ...Array.from(new Set(exerciseDatabase.map(exercise => exercise.category)))];
-  const equipmentOptions = ['All', ...Array.from(new Set(exerciseDatabase.flatMap(exercise => exercise.equipment)))];
+  // State for Delete Confirmation Modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [workoutToDeleteId, setWorkoutToDeleteId] = useState<string | null>(null);
   
-  // Filter exercises based on selected filters
-  useEffect(() => {
-    let result = exerciseDatabase;
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        ex => ex.name.toLowerCase().includes(query) || ex.description.toLowerCase().includes(query)
-      );
-    }
-    
-    if (categoryFilter !== 'All') {
-      result = result.filter(ex => ex.category === categoryFilter);
-    }
-    
-    if (equipmentFilter !== 'All') {
-      result = result.filter(ex => ex.equipment.includes(equipmentFilter));
-    }
-    
-    setFilteredExercises(result);
-  }, [searchQuery, categoryFilter, equipmentFilter]);
+  const navigate = useNavigate();
   
   // Add exercise to workout
   const addExerciseToWorkout = (exercise: Exercise) => {
@@ -79,12 +57,24 @@ const WorkoutBuilder: React.FC = () => {
     setSelectedExercises(updatedExercises);
   };
   
-  // Update exercise details
-  const updateExerciseDetails = (index: number, field: keyof Omit<CustomExercise, 'exercise'>, value: any) => {
+  // Update exercise details - use specific types for value based on field
+  const updateExerciseDetails = (
+    index: number, 
+    field: keyof Omit<CustomExercise, 'exercise'>, 
+    value: string | number // More specific than 'any'
+  ) => {
     const updatedExercises = [...selectedExercises];
+    const currentExercise = updatedExercises[index];
+
+    // Type assertion or checking based on field might be needed if parsing required
+    let processedValue = value;
+    if (field === 'sets' || field === 'restTime') {
+      processedValue = typeof value === 'string' ? parseInt(value) || (field === 'sets' ? 1 : 0) : value;
+    } 
+
     updatedExercises[index] = {
-      ...updatedExercises[index],
-      [field]: value
+      ...currentExercise,
+      [field]: processedValue
     };
     setSelectedExercises(updatedExercises);
   };
@@ -106,28 +96,145 @@ const WorkoutBuilder: React.FC = () => {
     setSelectedExercises(updatedExercises);
   };
   
-  // Save workout
-  const saveWorkout = () => {
-    // Validate inputs
+  // Save or Update workout
+  const saveOrUpdateWorkout = () => {
+    console.log("saveOrUpdateWorkout called"); // Log start
+    console.log("Current savedWorkouts:", savedWorkouts); // Log existing state
     const trimmedName = workoutName.trim();
     const trimmedDescription = workoutDescription.trim();
+    console.log("Workout Name:", trimmedName, "Exercises Count:", selectedExercises.length);
     
-    if (!trimmedName || selectedExercises.length === 0) return;
+    if (!trimmedName || selectedExercises.length === 0) {
+      console.log("Validation failed: Name or exercises missing."); // Log validation fail
+      toast.error("Please enter a workout name and add at least one exercise.");
+      return;
+    }
     
-    const newWorkout: CustomWorkout = {
-      id: Date.now().toString(),
-      name: trimmedName,
-      description: trimmedDescription,
-      exercises: selectedExercises,
-      createdAt: new Date().toISOString()
-    };
+    if (editingWorkoutId) {
+      console.log("Attempting to UPDATE workout ID:", editingWorkoutId);
+      const nameConflict = savedWorkouts.find(
+        workout => workout.id !== editingWorkoutId && workout.name === trimmedName
+      );
+      if (nameConflict) {
+        console.log("Update failed: Name conflict found."); // Log name conflict
+        toast.error(`Another workout named "${trimmedName}" already exists. Please choose a different name.`);
+        return;
+      }
+      
+      console.log("Updating workout..."); // Log update action
+      // Use a callback to ensure we're working with the latest state
+      setSavedWorkouts(prevWorkouts => {
+        const updatedWorkouts = prevWorkouts.map(workout => 
+          workout.id === editingWorkoutId 
+            ? { ...workout, name: trimmedName, description: trimmedDescription, exercises: selectedExercises } 
+            : workout
+        );
+        console.log("New workouts after update:", updatedWorkouts); // Log new state
+        return updatedWorkouts;
+      });
+      
+      toast.success('Workout updated successfully!');
+      console.log("Workout updated."); // Log success
+    } else {
+      console.log("Attempting to SAVE NEW workout.");
+      const nameConflict = savedWorkouts.find(workout => workout.name === trimmedName);
+      if (nameConflict) {
+        console.log("Save failed: Name conflict found."); // Log name conflict
+        toast.error(`A workout named "${trimmedName}" already exists. Please choose a different name or edit the existing one.`);
+        return;
+      }
+      
+      const newWorkout: CustomWorkout = {
+        id: uuidv4(),
+        name: trimmedName,
+        description: trimmedDescription,
+        exercises: selectedExercises,
+        createdAt: new Date().toISOString()
+      };
+      console.log("Saving new workout:", newWorkout); // Log save action
+      
+      // Use a callback to ensure we're working with the latest state
+      setSavedWorkouts(prevWorkouts => {
+        const newWorkouts = [...prevWorkouts, newWorkout];
+        console.log("New workouts state:", newWorkouts);
+        return newWorkouts;
+      });
+      
+      toast.success('Workout saved successfully!');
+      console.log("New workout saved."); // Log success
+    }
     
-    setSavedWorkouts([...savedWorkouts, newWorkout]);
-    
-    // Reset form
+    console.log("Resetting form."); // Log form reset
+    resetForm();
+  };
+
+  // Start editing a workout
+  const startEditing = (workout: CustomWorkout) => {
+    setEditingWorkoutId(workout.id);
+    setWorkoutName(workout.name);
+    setWorkoutDescription(workout.description);
+    setSelectedExercises(workout.exercises);
+    // Optionally scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  };
+
+  // Cancel editing
+  const cancelEditing = () => {
+    resetForm();
+  };
+
+  // Reset form fields and editing state
+  const resetForm = () => {
+    setEditingWorkoutId(null);
     setWorkoutName('');
     setWorkoutDescription('');
     setSelectedExercises([]);
+  };
+
+  // Delete a saved workout - triggers confirmation modal
+  const deleteWorkout = (id: string) => {
+    // Store the ID and open the modal instead of confirming directly
+    setWorkoutToDeleteId(id);
+    setIsDeleteModalOpen(true);
+  };
+  
+  // Handles the confirmation action from the delete modal
+  const handleDeleteConfirmation = (confirm: boolean) => {
+    if (confirm && workoutToDeleteId) {
+      // Use callback form to ensure we're working with the latest state
+      setSavedWorkouts(prevWorkouts => {
+        return prevWorkouts.filter(workout => workout.id !== workoutToDeleteId);
+      });
+      
+      toast.success('Workout deleted.');
+      // If currently editing the deleted workout, reset the form
+      if (editingWorkoutId === workoutToDeleteId) {
+        resetForm();
+      }
+    }
+    // Always close the modal and clear the ID
+    setIsDeleteModalOpen(false);
+    setWorkoutToDeleteId(null);
+  };
+  
+  // Function to prepare a saved workout for adding to the calendar
+  const handleScheduleWorkout = (workout: CustomWorkout) => {
+    console.log("handleScheduleWorkout called for:", workout.name);
+    const eventData = {
+      title: workout.name,
+      type: 'custom',
+    };
+    try {
+      // Use sessionStorage instead of localStorage for more reliable cross-page persistence
+      sessionStorage.setItem('pending-calendar-add', JSON.stringify(eventData));
+      console.log("Stored in sessionStorage:", sessionStorage.getItem('pending-calendar-add'));
+      toast.success(`"${workout.name}" is ready to add to the calendar. Click a date on the Calendar page.`, { duration: 5000 });
+      // Navigate programmatically to calendar
+      navigate('/calendar'); 
+    } catch (error) {
+      console.error("Error setting sessionStorage:", error);
+      toast.error("Could not prepare workout for scheduling.");
+    }
   };
   
   return (
@@ -294,7 +401,7 @@ const WorkoutBuilder: React.FC = () => {
                           min="1"
                           className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
                           value={item.sets}
-                          onChange={(e) => updateExerciseDetails(index, 'sets', parseInt(e.target.value) || 1)}
+                          onChange={(e) => updateExerciseDetails(index, 'sets', e.target.value)}
                         />
                       </div>
                       
@@ -317,7 +424,7 @@ const WorkoutBuilder: React.FC = () => {
                           step="5"
                           className="w-full px-2 py-1 border border-gray-300 rounded-md text-sm"
                           value={item.restTime}
-                          onChange={(e) => updateExerciseDetails(index, 'restTime', parseInt(e.target.value) || 0)}
+                          onChange={(e) => updateExerciseDetails(index, 'restTime', e.target.value)}
                         />
                       </div>
                     </div>
@@ -337,14 +444,29 @@ const WorkoutBuilder: React.FC = () => {
             )}
           </div>
           
-          {/* Save Button */}
-          <div className="flex justify-end">
+          {/* Save/Update Button */}
+          <div className="flex justify-end space-x-2">
+            {editingWorkoutId && (
+              <button
+                type="button"
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                onClick={() => {
+                  console.log("Cancel Edit button clicked");
+                  cancelEditing();
+                }}
+              >
+                Cancel Edit
+              </button>
+            )}
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-              onClick={saveWorkout}
+              onClick={() => {
+                console.log("Save/Update button clicked");
+                saveOrUpdateWorkout();
+              }}
               disabled={!workoutName || selectedExercises.length === 0}
             >
-              Save Workout
+              {editingWorkoutId ? 'Update Workout' : 'Save Workout'}
             </button>
           </div>
         </div>
@@ -357,24 +479,77 @@ const WorkoutBuilder: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {savedWorkouts.map((workout) => (
-              <div key={workout.id} className="bg-white rounded-lg shadow-md p-4">
+              <div key={workout.id} className="bg-white rounded-lg shadow-md p-4 flex flex-col">
                 <h3 className="font-bold text-lg text-gray-800 mb-1">{workout.name}</h3>
-                <p className="text-sm text-gray-500 mb-3">
+                <p className="text-sm text-gray-500 mb-3 flex-grow">
                   {workout.description || 'No description provided'}
                 </p>
                 <p className="text-xs text-gray-500 mb-3">
                   Created: {new Date(workout.createdAt).toLocaleDateString()}
                 </p>
-                <div className="space-y-1">
-                  {workout.exercises.map((exercise, i) => (
-                    <div key={i} className="text-sm">
+                <div className="space-y-1 mb-4">
+                  {workout.exercises.slice(0, 3).map((exercise, i) => (
+                    <div key={i} className="text-sm truncate">
                       <span className="font-medium">{exercise.exercise.name}</span>
                       <span className="text-gray-500"> - {exercise.sets} sets x {exercise.reps}</span>
                     </div>
                   ))}
+                  {workout.exercises.length > 3 && (
+                    <div className="text-sm text-gray-500">... and {workout.exercises.length - 3} more</div>
+                  )}
                 </div>
+                <div className="flex justify-end space-x-2 mt-auto">
+                   <button
+                     onClick={() => startEditing(workout)}
+                     className="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
+                   >
+                     Edit
+                   </button>
+                   <button
+                     onClick={() => deleteWorkout(workout.id)}
+                     className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                   >
+                     Delete
+                   </button>
+                   {/* Add to Calendar Button */}
+                   <button
+                     onClick={() => {
+                       console.log("Add to Calendar button clicked for workout:", workout.name);
+                       handleScheduleWorkout(workout);
+                     }}
+                     className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                   >
+                     Add to Calendar
+                   </button>
+                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-lg font-bold mb-4">Confirm Deletion</h3>
+            <p className="mb-6 text-gray-700">
+              Are you sure you want to delete this workout? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                onClick={() => handleDeleteConfirmation(false)} // Call handler with false
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                onClick={() => handleDeleteConfirmation(true)} // Call handler with true
+              >
+                Delete Workout
+              </button>
+            </div>
           </div>
         </div>
       )}

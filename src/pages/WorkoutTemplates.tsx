@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { workoutTemplates } from '../utils/workoutTemplates';
-import { Exercise, WorkoutPlan, TemplateExercise, TemplateDay } from '../types';
+import { Exercise, WorkoutPlan, TemplateExercise, TemplateDay, isTemplateDay, isTemplateExercise } from '../types';
 import { exerciseDatabase } from '../utils/exerciseDatabase';
 import useLocalStorage from '../hooks/useLocalStorage';
 
@@ -10,6 +10,10 @@ interface SavedTemplate {
   templateId: string;
   name: string;
   savedDate: string;
+  version: number; // Add version tracking
+  goal?: string;
+  difficulty?: string;
+  days: any[]; // Store complete day data
 }
 
 const WorkoutTemplates: React.FC = () => {
@@ -20,6 +24,9 @@ const WorkoutTemplates: React.FC = () => {
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [filteredTemplates, setFilteredTemplates] = useState<WorkoutPlan[]>(workoutTemplates);
   const [savedTemplates, setSavedTemplates] = useLocalStorage<SavedTemplate[]>('saved-workout-templates', []);
+  
+  // Add versioning constant - increment this when template structure changes
+  const TEMPLATE_VERSION = 1;
   
   // Unique goals and difficulty levels from the templates
   const goals = ['All', ...Array.from(new Set(workoutTemplates.map(t => t.goal || 'Other')))];
@@ -42,11 +49,20 @@ const WorkoutTemplates: React.FC = () => {
   
   // Get exercise details from exercise ID
   const getExerciseById = (id: string): Exercise | undefined => {
-    return exerciseDatabase.find(exercise => exercise.id === id);
+    const exercise = exerciseDatabase.find(exercise => exercise.id === id);
+    if (!exercise) {
+      console.warn(`Exercise with ID ${id} not found in the database`);
+    }
+    return exercise;
   };
   
   // View template details
   const handleViewTemplate = (template: WorkoutPlan) => {
+    if (!template) {
+      console.error('Attempted to view undefined template');
+      return;
+    }
+    
     setSelectedTemplate(template);
     setShowDetails(true);
     setExpandedDay(null);
@@ -58,7 +74,11 @@ const WorkoutTemplates: React.FC = () => {
       id: Date.now().toString(),
       templateId: template.id,
       name: template.name,
-      savedDate: new Date().toISOString()
+      savedDate: new Date().toISOString(),
+      version: TEMPLATE_VERSION,
+      goal: template.goal,
+      difficulty: template.difficulty,
+      days: template.days // Store complete day data
     };
     
     setSavedTemplates([...savedTemplates, newSavedTemplate]);
@@ -104,6 +124,29 @@ const WorkoutTemplates: React.FC = () => {
         {formatDifficulty(difficulty)}
       </span>
     );
+  };
+  
+  // Get template data, either from current templates or saved data
+  const getTemplateData = (savedTemplate: SavedTemplate): WorkoutPlan => {
+    // First try to find the template in the current templates
+    const currentTemplate = workoutTemplates.find(t => t.id === savedTemplate.templateId);
+    
+    // If found and versions match, use current template
+    if (currentTemplate && savedTemplate.version === TEMPLATE_VERSION) {
+      return currentTemplate;
+    }
+    
+    // Otherwise, construct from saved data
+    return {
+      id: savedTemplate.templateId,
+      name: savedTemplate.name,
+      goal: savedTemplate.goal,
+      difficulty: savedTemplate.difficulty || 'beginner',
+      days: savedTemplate.days || [],
+      duration: 45, // Default values if not saved
+      equipment: [],
+      frequency: 3
+    };
   };
   
   return (
@@ -207,6 +250,14 @@ const WorkoutTemplates: React.FC = () => {
             ))}
           </div>
           
+          {/* No templates found message */}
+          {filteredTemplates.length === 0 && (
+            <div className="text-center p-8 bg-gray-50 rounded-lg shadow-inner">
+              <p className="text-lg text-gray-600">No templates found with the selected filters.</p>
+              <p className="mt-2">Try changing your filter criteria.</p>
+            </div>
+          )}
+          
           {/* Saved Templates */}
           {savedTemplates.length > 0 && (
             <div className="mt-8">
@@ -214,17 +265,22 @@ const WorkoutTemplates: React.FC = () => {
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <ul className="divide-y divide-gray-200">
                   {savedTemplates.map((saved) => {
-                    const template = workoutTemplates.find(t => t.id === saved.templateId);
+                    const templateData = getTemplateData(saved);
                     return (
                       <li key={saved.id} className="p-4 hover:bg-gray-50">
                         <div className="flex justify-between items-center">
                           <div>
                             <h3 className="font-medium text-gray-800">{saved.name}</h3>
-                            <p className="text-gray-500 text-sm">Saved on {new Date(saved.savedDate).toLocaleDateString()}</p>
+                            <p className="text-gray-500 text-sm">
+                              Saved on {new Date(saved.savedDate).toLocaleDateString()}
+                              {saved.version !== TEMPLATE_VERSION && (
+                                <span className="ml-2 text-orange-500">(Using saved version)</span>
+                              )}
+                            </p>
                           </div>
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => template && handleViewTemplate(template)}
+                              onClick={() => handleViewTemplate(templateData)}
                               className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                             >
                               View
@@ -248,131 +304,151 @@ const WorkoutTemplates: React.FC = () => {
       ) : (
         selectedTemplate && (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Template Details Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold">{selectedTemplate.name}</h2>
-                  <p className="text-blue-100 mt-1">{selectedTemplate.description}</p>
-                  
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <span className="bg-white bg-opacity-20 text-white text-sm px-2 py-1 rounded">
-                      {selectedTemplate.goal}
-                    </span>
-                    <span className="bg-white bg-opacity-20 text-white text-sm px-2 py-1 rounded">
-                      {formatDifficulty(selectedTemplate.difficulty)}
-                    </span>
-                    <span className="bg-white bg-opacity-20 text-white text-sm px-2 py-1 rounded">
-                      {selectedTemplate.frequency} days/week
-                    </span>
-                    <span className="bg-white bg-opacity-20 text-white text-sm px-2 py-1 rounded">
-                      {selectedTemplate.duration} min
-                    </span>
-                  </div>
-                </div>
-                
+            {/* Template details header */}
+            <div className="p-6 border-b">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-xl font-bold">{selectedTemplate.name}</h2>
                 <button
                   onClick={() => setShowDetails(false)}
-                  className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-50"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  Back to List
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
+              
+              <p className="text-gray-600 mb-4">{selectedTemplate.description || 'No description available.'}</p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <span className="text-gray-500 block text-sm">Goal</span>
+                  <span className="font-medium">{selectedTemplate.goal || 'General fitness'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-sm">Difficulty</span>
+                  <span className="font-medium">{formatDifficulty(selectedTemplate.difficulty)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-sm">Duration</span>
+                  <span className="font-medium">{selectedTemplate.duration} minutes</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-sm">Frequency</span>
+                  <span className="font-medium">{selectedTemplate.frequency || '3-4'} days/week</span>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <span className="text-gray-500 block text-sm mb-2">Equipment Needed</span>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.equipment && selectedTemplate.equipment.length > 0 ? (
+                    selectedTemplate.equipment.map((item, index) => (
+                      <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                        {item}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-600">No equipment specified</span>
+                  )}
+                </div>
+              </div>
+              
+              {!isTemplateSaved(selectedTemplate.id) ? (
+                <button
+                  onClick={() => handleSaveTemplate(selectedTemplate)}
+                  className="mt-6 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                >
+                  Save This Workout
+                </button>
+              ) : (
+                <button
+                  className="mt-6 bg-gray-300 text-gray-700 py-2 px-4 rounded cursor-not-allowed"
+                  disabled
+                >
+                  Already Saved
+                </button>
+              )}
             </div>
             
-            {/* Days Listing */}
-            <div className="p-5">
+            {/* Workout schedule */}
+            <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Workout Schedule</h3>
               
-              <div className="space-y-4">
-                {(selectedTemplate.days as TemplateDay[]).map((day, dayIndex) => (
-                  <div key={dayIndex} className="border rounded-lg overflow-hidden">
-                    <div
-                      className={`p-4 cursor-pointer ${
-                        expandedDay === dayIndex ? 'bg-blue-50' : 'bg-gray-50'
-                      }`}
-                      onClick={() => toggleDayExpansion(dayIndex)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-medium">{day.name}</h4>
-                        <svg
-                          className={`w-5 h-5 transition-transform ${
-                            expandedDay === dayIndex ? 'transform rotate-180' : ''
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+              {!selectedTemplate.days || selectedTemplate.days.length === 0 ? (
+                <p className="text-gray-500">No workout days defined in this template.</p>
+              ) : (
+                <div className="space-y-4">
+                  {selectedTemplate.days.map((day, dayIndex) => {
+                    if (!day) return null;
                     
-                    {expandedDay === dayIndex && (
-                      <div className="p-4 border-t">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Exercise
-                              </th>
-                              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Sets
-                              </th>
-                              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Reps
-                              </th>
-                              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rest
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {day.exercises.map((exerciseItem: TemplateExercise, exIndex) => {
-                              const exercise = getExerciseById(exerciseItem.exerciseId);
-                              
-                              return exercise ? (
-                                <tr key={exIndex}>
-                                  <td className="px-3 py-2 whitespace-nowrap">
-                                    <div>
-                                      <div className="text-sm font-medium text-gray-900">
-                                        {exercise.name}
+                    const dayName = isTemplateDay(day) ? day.name : `Day ${dayIndex + 1}`;
+                    const exercises = 'exercises' in day ? day.exercises : [];
+                    
+                    return (
+                      <div key={dayIndex} className="mb-4">
+                        <div 
+                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                          onClick={() => toggleDayExpansion(dayIndex)}
+                        >
+                          <h3 className="font-semibold">{dayName}</h3>
+                          <span>
+                            {expandedDay === dayIndex ? (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            )}
+                          </span>
+                        </div>
+                        
+                        {expandedDay === dayIndex && (
+                          <div className="mt-2 p-4 bg-white rounded-lg border border-gray-100">
+                            {exercises.length === 0 ? (
+                              <p className="text-gray-500">No exercises defined for this day.</p>
+                            ) : (
+                              <ul className="divide-y divide-gray-100">
+                                {exercises.map((item: any, exIndex) => {
+                                  // Handle both template exercise format and workout day format
+                                  const exerciseId = isTemplateExercise(item) ? item.exerciseId : item.exercise?.id;
+                                  const exercise = isTemplateExercise(item) ? getExerciseById(item.exerciseId) : item.exercise;
+                                  
+                                  if (!exercise) {
+                                    return (
+                                      <li key={exIndex} className="py-3 flex flex-col">
+                                        <div className="text-red-500">Exercise data missing (ID: {exerciseId || 'unknown'})</div>
+                                      </li>
+                                    );
+                                  }
+                                  
+                                  return (
+                                    <li key={exIndex} className="py-3 flex flex-col">
+                                      <div className="flex justify-between">
+                                        <span className="font-medium">{exercise.name}</span>
+                                        <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                                          {item.sets} sets × {item.reps} reps
+                                        </span>
                                       </div>
-                                      <div className="text-xs text-gray-500">
-                                        {exercise.equipment.join(', ')}
+                                      <div className="text-gray-500 text-sm mt-1">{exercise.description}</div>
+                                      <div className="flex items-center mt-2 text-sm text-gray-600">
+                                        <span className="mr-4">Rest: {item.restTime}s</span>
+                                        <span>{renderDifficultyTag(exercise.difficulty)}</span>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                    {exerciseItem.sets}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                    {exerciseItem.reps}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                                    {exerciseItem.restTime}s
-                                  </td>
-                                </tr>
-                              ) : (
-                                <tr key={exIndex}>
-                                  <td colSpan={4} className="px-3 py-2 text-sm text-red-500">
-                                    Exercise not found: {exerciseItem.exerciseId}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
               
               {/* Save Template Button */}
               <div className="mt-6 flex justify-end">

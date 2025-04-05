@@ -1,4 +1,41 @@
 import { WorkoutPlan } from "../types";
+import { exerciseDatabase } from "./exerciseDatabase";
+
+// Function to validate exercise IDs in templates
+const validateTemplateExercises = (templates: WorkoutPlan[]): void => {
+  // Create a set of all valid exercise IDs from the database
+  const validExerciseIds = new Set(exerciseDatabase.map(exercise => exercise.id));
+  
+  // Track missing exercise IDs
+  const missingExerciseIds = new Set<string>();
+  
+  // Check each template
+  templates.forEach(template => {
+    if (!template.days) return;
+    
+    template.days.forEach(day => {
+      if ('exercises' in day && Array.isArray(day.exercises)) {
+        day.exercises.forEach(exercise => {
+          // Handle template exercise structure
+          if ('exerciseId' in exercise) {
+            const exerciseId = exercise.exerciseId;
+            if (!validExerciseIds.has(exerciseId)) {
+              missingExerciseIds.add(exerciseId);
+              console.warn(`Template "${template.name}" references non-existent exercise ID: ${exerciseId}`);
+            }
+          }
+        });
+      }
+    });
+  });
+  
+  // Log summary of validation
+  if (missingExerciseIds.size > 0) {
+    console.error(`Found ${missingExerciseIds.size} invalid exercise references in templates: ${Array.from(missingExerciseIds).join(', ')}`);
+  } else {
+    console.log('All template exercise references are valid!');
+  }
+};
 
 // Workout routine templates for different fitness goals
 export const workoutTemplates: WorkoutPlan[] = [
@@ -651,6 +688,11 @@ export const workoutTemplates: WorkoutPlan[] = [
     ]
   }
 ];
+
+// Run validation in development environment
+if (process.env.NODE_ENV !== 'production') {
+  validateTemplateExercises(workoutTemplates);
+}
 
 // Function to get a workout template by id
 export const getWorkoutTemplateById = (id: string): WorkoutPlan | undefined => {

@@ -35,8 +35,10 @@ const WorkoutPlan: React.FC<WorkoutPlanProps> = ({
     
     // Filter exercises based on equipment and environment
     const filteredExercises = exerciseDatabase.filter(exercise => {
-      // Check if the exercise's equipment matches user's available equipment
-      return equipment.some(item => exercise.equipment.includes(item));
+      // Check if at least one of the exercise's required equipment is available to the user
+      // or if the exercise can be done with no equipment
+      return exercise.equipment.some(item => equipment.includes(item)) || 
+             exercise.equipment.includes('None');
     });
 
     // Group exercises by category
@@ -127,11 +129,38 @@ const WorkoutPlan: React.FC<WorkoutPlanProps> = ({
 
   // Add workout to calendar
   const addToCalendar = (workout: WorkoutDay[]) => {
-    // Calculate start date (next Monday) and end date based on duration
+    // Find the earliest selected weekday to use as the starting point
     const today = new Date();
+    const dayIndices: Record<string, number> = {
+      'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 
+      'Friday': 5, 'Saturday': 6, 'Sunday': 0
+    };
+    
+    // Sort workout days by their weekday index
+    const sortedWorkoutDays = [...workoutDays].sort((a, b) => 
+      (dayIndices[a] || 0) - (dayIndices[b] || 0)
+    );
+    
+    // If no workout days, exit early
+    if (sortedWorkoutDays.length === 0) {
+      console.warn('No workout days specified, unable to add to calendar');
+      return;
+    }
+    
+    // Find days until the first workout day
+    const firstWorkoutDay = sortedWorkoutDays[0];
+    const currentDayIndex = today.getDay();
+    const targetDayIndex = dayIndices[firstWorkoutDay] || 1;
+    
+    // Calculate days until first workout day (if today is the day, schedule for next week)
+    let daysUntilStart = targetDayIndex - currentDayIndex;
+    if (daysUntilStart <= 0) {
+      daysUntilStart += 7;
+    }
+    
+    // Calculate start date
     const startDate = new Date(today);
-    const daysUntilMonday = (8 - startDate.getDay()) % 7;
-    startDate.setDate(startDate.getDate() + daysUntilMonday);
+    startDate.setDate(startDate.getDate() + daysUntilStart);
     
     // Calculate how many weeks/months to generate
     let totalDays: number;
@@ -147,6 +176,10 @@ const WorkoutPlan: React.FC<WorkoutPlanProps> = ({
     // Create new events for each workout day in the duration
     const newEvents = [];
     const workoutsByDay = workout.reduce((acc, day) => {
+      if (!day || !day.day) {
+        console.warn('Invalid workout day:', day);
+        return acc;
+      }
       acc[day.day] = day;
       return acc;
     }, {} as Record<string, WorkoutDay>);
@@ -160,10 +193,15 @@ const WorkoutPlan: React.FC<WorkoutPlanProps> = ({
       
       if (workoutsByDay[weekdayName]) {
         const workoutDay = workoutsByDay[weekdayName];
+        if (!workoutDay.exercises || workoutDay.exercises.length === 0) {
+          console.warn(`Skipping workout for ${weekdayName} as it has no exercises`);
+          continue;
+        }
+        
         const dateString = currentDate.toISOString().split('T')[0];
         
         // Calculate main workout type based on exercises
-        const exerciseCategories = workoutDay.exercises.map(ex => ex.exercise.category);
+        const exerciseCategories = workoutDay.exercises.map(ex => ex.exercise?.category || 'unknown');
         let workoutType = 'strength';
         
         if (exerciseCategories.includes('Cardio') || exerciseCategories.includes('HIIT')) {
@@ -180,84 +218,121 @@ const WorkoutPlan: React.FC<WorkoutPlanProps> = ({
       }
     }
     
-    // Combine with existing events
-    const combinedEvents = [...existingEvents, ...newEvents];
+    // Combine with existing events, avoiding duplicates
+    const existingDates = new Set(existingEvents.map((e: any) => e.date));
+    const uniqueNewEvents = newEvents.filter(e => !existingDates.has(e.date));
+    const combinedEvents = [...existingEvents, ...uniqueNewEvents];
     
     // Save to localStorage
     localStorage.setItem('workout-calendar-events', JSON.stringify(combinedEvents));
     
-    console.log(`Added ${newEvents.length} workout events to calendar spanning ${totalDays} days`);
+    console.log(`Added ${uniqueNewEvents.length} workout events to calendar spanning ${totalDays} days`);
   };
 
   // Export workout plan to Google Calendar
   const exportToGoogleCalendar = () => {
-    // Calculate start date (next Monday) and end date based on duration
-    const today = new Date();
-    const startDate = new Date(today);
-    const daysUntilMonday = (8 - startDate.getDay()) % 7;
-    startDate.setDate(startDate.getDate() + daysUntilMonday);
-    
-    // Create events for each workout day in the plan
-    const calendarEvents = [];
-    const workoutsByDay = workoutPlan.reduce((acc, day) => {
-      acc[day.day] = day;
-      return acc;
-    }, {} as Record<string, WorkoutDay>);
-    
-    // Calculate how many weeks to generate based on plan duration
-    let totalDays: number;
-    if (planDuration.unit === 'weeks') {
-      totalDays = planDuration.value * 7;
-    } else {
-      totalDays = planDuration.value * 30; // approximate for months
-    }
-    
-    // Create multiple date events spanning the plan duration
-    for (let i = 0; i < totalDays; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(currentDate.getDate() + i);
+    try {
+      // Calculate start date (next Monday) and end date based on duration
+      const today = new Date();
+      const startDate = new Date(today);
+      const daysUntilMonday = (8 - startDate.getDay()) % 7;
+      startDate.setDate(startDate.getDate() + daysUntilMonday);
       
-      const weekdayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+      // Create events for each workout day in the plan
+      const calendarEvents = [];
+      const workoutsByDay = workoutPlan.reduce((acc, day) => {
+        if (!day || !day.day) {
+          console.warn('Invalid workout day data found');
+          return acc;
+        }
+        acc[day.day] = day;
+        return acc;
+      }, {} as Record<string, WorkoutDay>);
       
-      if (workoutsByDay[weekdayName]) {
-        const workoutDay = workoutsByDay[weekdayName];
-        const firstExercise = workoutDay.exercises[0]?.exercise.name || '';
-        const lastExercise = workoutDay.exercises[workoutDay.exercises.length - 1]?.exercise.name || '';
-        
-        // Set an hour for the workout (default to 5pm)
-        currentDate.setHours(17, 0, 0, 0);
-        const endDate = new Date(currentDate);
-        endDate.setHours(endDate.getHours() + 1);
-        
-        // Format dates for Google Calendar
-        const startIso = currentDate.toISOString().replace(/-|:|\.\d+/g, '');
-        const endIso = endDate.toISOString().replace(/-|:|\.\d+/g, '');
-        
-        // Create event title and description
-        const eventTitle = `Workout: ${workoutDay.exercises.length} Exercises`;
-        const eventDescription = `FitPlan Pro Workout\n\nExercises include: ${firstExercise}${workoutDay.exercises.length > 1 ? ` to ${lastExercise}` : ''}\n\nTotal exercises: ${workoutDay.exercises.length}`;
-        
-        // Create Google Calendar URL
-        const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startIso}/${endIso}&details=${encodeURIComponent(eventDescription)}`;
-        
-        calendarEvents.push({
-          date: currentDate,
-          title: eventTitle,
-          description: eventDescription,
-          url: googleCalendarUrl
-        });
+      // Calculate how many weeks to generate based on plan duration
+      let totalDays: number;
+      if (planDuration.unit === 'weeks') {
+        totalDays = planDuration.value * 7;
+      } else {
+        totalDays = planDuration.value * 30; // approximate for months
       }
+      
+      // Create multiple date events spanning the plan duration
+      for (let i = 0; i < totalDays; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        
+        const weekdayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+        
+        if (workoutsByDay[weekdayName]) {
+          const workoutDay = workoutsByDay[weekdayName];
+          if (!workoutDay.exercises || !workoutDay.exercises.length) {
+            continue; // Skip days with no exercises
+          }
+
+          const firstExercise = workoutDay.exercises[0]?.exercise?.name || 'Exercise';
+          const lastExercise = workoutDay.exercises[workoutDay.exercises.length - 1]?.exercise?.name || 'Exercise';
+          
+          // Set an hour for the workout (default to 5pm)
+          currentDate.setHours(17, 0, 0, 0);
+          const endDate = new Date(currentDate);
+          endDate.setHours(endDate.getHours() + 1);
+          
+          // Format dates for Google Calendar
+          const startIso = currentDate.toISOString().replace(/-|:|\.\d+/g, '');
+          const endIso = endDate.toISOString().replace(/-|:|\.\d+/g, '');
+          
+          // Create event title and description
+          const eventTitle = `Workout: ${workoutDay.exercises.length} Exercises`;
+          const eventDescription = `FitPlan Pro Workout\n\nExercises include: ${firstExercise}${workoutDay.exercises.length > 1 ? ` to ${lastExercise}` : ''}\n\nTotal exercises: ${workoutDay.exercises.length}`;
+          
+          // Limit URL length to avoid issues with long descriptions
+          const maxDescLength = 500;
+          const truncatedDesc = eventDescription.length > maxDescLength ? 
+                               eventDescription.substring(0, maxDescLength) + '...' : 
+                               eventDescription;
+          
+          // Properly encode URL components
+          const encodedTitle = encodeURIComponent(eventTitle);
+          const encodedDesc = encodeURIComponent(truncatedDesc);
+          
+          // Create Google Calendar URL with proper encoding
+          const googleCalendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodedTitle}&dates=${startIso}/${endIso}&details=${encodedDesc}`;
+          
+          if (googleCalendarUrl.length > 2000) {
+            // URL too long, create simplified version
+            const simpleDesc = encodeURIComponent(`FitPlan Pro Workout (${workoutDay.exercises.length} exercises)`);
+            const simpleUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodedTitle}&dates=${startIso}/${endIso}&details=${simpleDesc}`;
+            calendarEvents.push({
+              date: currentDate,
+              title: eventTitle,
+              description: 'Workout details (simplified due to length)',
+              url: simpleUrl
+            });
+          } else {
+            calendarEvents.push({
+              date: currentDate,
+              title: eventTitle,
+              description: truncatedDesc,
+              url: googleCalendarUrl
+            });
+          }
+        }
+      }
+      
+      // Open the first event in a new tab
+      if (calendarEvents.length > 0) {
+        window.open(calendarEvents[0].url, '_blank');
+        
+        // Show success message with event count
+        alert(`Created ${calendarEvents.length} calendar events. The first one has been opened in a new tab.`);
+      } else {
+        alert('No workout days found that match your weekly schedule.');
+      }
+    } catch (error) {
+      console.error('Error creating Google Calendar events:', error);
+      alert('Failed to create Google Calendar events. Please try again later.');
     }
-    
-    // For Google Calendar, we open the first few events (limit to 5 to avoid popup blocking)
-    const eventsToOpen = calendarEvents.slice(0, 5);
-    eventsToOpen.forEach((event, index) => {
-      setTimeout(() => {
-        window.open(event.url, '_blank');
-      }, index * 500);
-    });
-    
-    return calendarEvents.length;
   };
   
   // Export workout plan to Apple Calendar (generates an ICS file)
